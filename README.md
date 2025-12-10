@@ -1,1 +1,1 @@
-# ai-code-review-bot (changed by test-pr2)
+# ai-code-bot (changed by test-pr2)
