@@ -27,7 +27,6 @@
 - [Docker Deployment](#-docker-deployment)
 - [Best Practices](#-best-practices)
 - [Contributing](#-contributing)
-- [License](#-license)
 
 ---
 
@@ -93,23 +92,26 @@ The project follows a **microservices architecture** with two main services:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    GitHub Repository                         │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     │ Webhook Events (pull_request)
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
+└────┬───────────────────────────────────────────────┬─────────┘
+     │                                               │
+     │ 1. Webhook Events (pull_request)             │ 7. Post Review Comments
+     │                                               │
+     ▼                                               ▲
+┌────────────────────────────────────────────────────┴─────────┐
 │              Webhook Service (Port 4001)                    │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │  • Receives GitHub webhooks                          │  │
-│  │  • Validates webhook signatures                      │  │
-│  │  • Fetches PR diffs from GitHub API                  │  │
-│  │  • Forwards review requests to Review Service        │  │
-│  │  • Posts comments back to GitHub                     │  │
+│  │  1. Receives GitHub webhooks                          │  │
+│  │  2. Validates webhook signatures                     │  │
+│  │  3. Fetches PR diffs from GitHub API                 │  │
+│  │  4. Forwards review requests to Review Service       │  │
+│  │  5. Receives review results                          │  │
+│  │  6. Posts AI review comments back to GitHub PR       │  │
 │  └──────────────────────────────────────────────────────┘  │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     │ HTTP Request (diff + metadata)
-                     ▼
+└────┬────────────────────────────────────────────────────────┘
+     │                                                         │
+     │ 4. HTTP Request (diff + metadata)                      │ 5. HTTP Response (review comments)
+     │                                                         │
+     ▼                                                         ▲
 ┌─────────────────────────────────────────────────────────────┐
 │              Review Service (Port 4002)                      │
 │  ┌──────────────────────────────────────────────────────┐  │
@@ -117,16 +119,28 @@ The project follows a **microservices architecture** with two main services:
 │  │  • Validates input with Zod schemas                  │  │
 │  │  • Sends diff to OpenAI API for analysis             │  │
 │  │  • Parses AI response into structured comments        │  │
-│  │  • Returns review results                            │  │
+│  │  • Returns review results to Webhook Service         │  │
 │  └──────────────────────────────────────────────────────┘  │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     │ OpenAI API
-                     ▼
+└────┬────────────────────────────────────────────────────────┘
+     │                                                         │
+     │ OpenAI API Request                                     │ OpenAI API Response
+     │                                                         │
+     ▼                                                         ▲
 ┌─────────────────────────────────────────────────────────────┐
 │                    OpenAI GPT Models                         │
+│  • Analyzes code diffs                                      │
+│  • Generates review comments and summary                    │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+**Complete Flow:**
+1. GitHub sends webhook event when PR is opened/updated
+2. Webhook Service validates the webhook signature
+3. Webhook Service fetches the PR diff from GitHub API
+4. Webhook Service forwards the diff to Review Service
+5. Review Service sends diff to OpenAI and receives AI review
+6. Review Service returns structured comments to Webhook Service
+7. **Webhook Service posts AI review comments back to GitHub PR** ✨
 
 ### Project Structure
 
@@ -198,14 +212,12 @@ ai-code-review-assistant/
    GITHUB_WEBHOOK_SECRET=your_webhook_secret_optional
    REVIEW_SERVICE_URL=http://localhost:4002
    PORT=4001
-   LOG_LEVEL=info
    ```
 
    **`services/review-service/.env`:**
    ```env
    OPENAI_API_KEY=your_openai_api_key_here
    PORT=4002
-   LOG_LEVEL=info
    ```
 
 2. **Start the services**
@@ -503,8 +515,6 @@ This project implements numerous production-ready best practices:
 - ✅ Shared type definitions
 - ✅ Comprehensive error types
 
-See [`BEST_PRACTICES_REVIEW.md`](./BEST_PRACTICES_REVIEW.md) and [`IMPLEMENTATION_SUMMARY.md`](./IMPLEMENTATION_SUMMARY.md) for detailed information.
-
 ---
 
 ## 🤝 Contributing
@@ -529,12 +539,6 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 🙏 Acknowledgments
 
 - [OpenAI](https://openai.com/) for the powerful language models
@@ -544,18 +548,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/ai-code-review-assistant/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/ai-code-review-assistant/discussions)
-
----
-
 <div align="center">
-
-**Made with ❤️ by the AI Code Review Assistant Team**
 
 ⭐ **Star this repo if you find it helpful!** ⭐
 
 </div>
-# ai-code-review-bot
