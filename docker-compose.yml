@@ -1,0 +1,31 @@
+services:
+  review-service:
+    build:
+      context: .
+      dockerfile: ./services/review-service/Dockerfile
+    ports:
+      - "4002:4002"
+    env_file:
+      - ./services/review-service/.env.docker
+    networks:
+      - default
+
+  webhook-service:
+    build:
+      context: .
+      dockerfile: ./services/webhook-service/Dockerfile
+    ports:
+      - "4001:4001"
+    env_file:
+      - ./services/webhook-service/.env.docker
+    environment:
+      - REVIEW_SERVICE_URL=http://review-service:4002
+    depends_on:
+      - review-service
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
+
