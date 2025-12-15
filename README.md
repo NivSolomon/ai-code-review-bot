@@ -98,14 +98,14 @@ The project follows a **microservices architecture** with two main services:
                 │                               ▲
                 ▼                               │
 ┌─────────────────────────────────────────────────────────────┐
-│              Webhook Service (Port 4001)                     │
+│              Webhook Service (Port 4001)                    │
 │                                                             │
-│  1. Receives GitHub webhooks                                 │
-│  2. Validates webhook signatures                             │
-│  3. Fetches PR diffs via GitHub API                          │
-│  4. Sends diff + metadata to Review Service                  │
-│  5. Receives AI review results                               │
-│  6. Posts review comments back to GitHub PR                  │
+│  1. Receives GitHub webhooks                                │
+│  2. Validates webhook signatures                            │
+│  3. Fetches PR diffs via GitHub API                         │
+│  4. Sends diff + metadata to Review Service                 │
+│  5. Receives AI review results                              │
+│  6. Posts review comments back to GitHub PR                 │
 │                                                             │
 └───────────────┬───────────────────────────────┬─────────────┘
                 │                               ▲
@@ -113,13 +113,13 @@ The project follows a **microservices architecture** with two main services:
                 │                               │
                 ▼                               │
 ┌─────────────────────────────────────────────────────────────┐
-│              Review Service (Port 4002)                      │
+│              Review Service (Port 4002)                     │
 │                                                             │
-│  • Receives code diff and PR metadata                        │
-│  • Validates input using Zod schemas                         │
-│  • Sends diff to OpenAI API                                  │
-│  • Parses AI response into structured comments               │
-│  • Returns review results to Webhook Service                 │
+│  • Receives code diff and PR metadata                       │
+│  • Validates input using Zod schemas                        │
+│  • Sends diff to OpenAI API                                 │
+│  • Parses AI response into structured comments              │
+│  • Returns review results to Webhook Service                │
 │                                                             │
 └───────────────┬───────────────────────────────┬─────────────┘
                 │                               ▲
